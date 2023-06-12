@@ -1,0 +1,13 @@
+.login-box{
+    max-width: 380px;
+    margin-top: 10%;
+}
+
+.heading{
+    align-self: center;
+}
+
+.input-text{
+    background-color: #f4f4f4; 
+  color: #333;
+}

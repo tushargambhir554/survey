@@ -1,0 +1,70 @@
+<div class="container main-box">
+  <h2>Welcome to the Dashboard</h2>
+
+  <form [formGroup]="reactiveForm">
+    <div class="form-group mt-3">
+      <label for="ques">Question :</label>
+      <input type="text" class="form-control" id="questionIdInput" formControlName="ques" placeholder="Enter the question">
+      <div *ngIf="reactiveForm.controls['ques'].invalid && reactiveForm.controls['ques'].touched" class="text-danger">
+        Question is required.
+      </div>
+    </div>
+    
+  
+    <div class="form-group mt-3">
+      <label for="code">Question Code: </label>
+      <input type="text" class="form-control" id="domainInput" formControlName="code" placeholder="Enter the question code">
+      <div *ngIf="reactiveForm.controls['code'].invalid && reactiveForm.controls['code'].touched" class="text-danger">
+        Code is required.
+      </div>
+    </div>
+
+    <div class="form-group mt-3">
+      <label for="marks">Marks:</label>
+      <input type="number" class="form-control" id="labelInput" formControlName="marks" placeholder="Enter the marks">
+      <div *ngIf="reactiveForm.controls['marks'].invalid && reactiveForm.controls['marks'].touched" class="text-danger">
+        Marks is required.
+      </div>
+    </div>
+  </form>
+
+  <button class="btn btn-primary mt-3" (click)="submitQuestion()">Submit</button>
+  <button class="btn btn-primary mt-3 ms-3" (click)="addQuestion()">Add Another Question</button>
+</div>
+
+<div class="container main-box">
+  <h2>Fetched Questions</h2>
+
+  <!-- Display fetched questions -->
+  <ul class="list-group">
+    <li class="list-group-item" *ngFor="let question of questions">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title bg-secondary text-white p-2 rounded-top">Id: {{ question.id }}</h5>
+          <div class="row">
+            <div class="col">
+              <h5 class="card-title">Text:</h5>
+              <p class="card-text">
+                <span [hidden]="question.editMode">{{ question.questionText[0].text }}</span>
+                <input type="text" [(ngModel)]="question.questionText[0].text" class="form-control" [hidden]="!question.editMode" />
+              </p>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col">
+              <p class="card-text">Code: {{ question.questionText[0].language.code }}</p>
+            </div>
+            <div class="col">
+              <p class="card-text">Weight: {{ question.weight }}</p>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-danger me-2" (click)="deleteQuestion(question.id)">Delete</button>
+            <button class="btn btn-primary ml-2 me-2" [disabled]="question.editMode" (click)="editQuestion(question)">Edit</button>
+            <button class="btn btn-success ml-2" *ngIf="question.editMode" (click)="saveQuestion(question)">Save</button>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>

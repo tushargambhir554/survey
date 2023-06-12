@@ -1,0 +1,58 @@
+<nav class="d-flex justify-content-start ">
+  <ul>
+    <li>SignUp</li>
+  </ul>
+</nav>
+
+<div class="d-flex justify-content-center">
+  <div class="d-flex flex-column bd-highlight mb-3 main-box">
+    <div class="d-flex justify-content-center login-box">
+      <p>Create Account</p>
+    </div>
+
+    <form (ngSubmit)="signup()">
+      <div class="mb-3 add-width mt-3" >
+        <label for="inputUsername" class="form-label">Username</label>
+        <input type="text" class="form-control input-text" id="inputUsername" [(ngModel)]="signupObj.username"
+          name="username" placeholder="Enter your username">
+      </div>
+
+      <div class="mb-3">
+        <label for="exampleInputEmail1" class="form-label">Email address</label>
+        <input type="email" class="form-control input-text" id="exampleInputEmail1" [(ngModel)]="signupObj.email"
+          name="email" placeholder="Enter a valid email">
+      </div>
+
+      <div class="mb-3">
+        <label for="inputPassword" class="form-label">Password</label>
+        <div class="input-group">
+          <input type="{{ passwordFieldType }}" class="form-control input-text" id="inputPassword" [(ngModel)]="signupObj.password" name="password" placeholder="Enter strong password">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()">
+              <i [ngClass]="{ 'bi-eye': passwordVisible, 'bi-eye-slash': !passwordVisible }"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      
+      
+      
+      
+
+      <div class="container mt-4">
+        <div class="row">
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary submit-btn w-100">Signup</button>
+          </div>
+        </div>
+      </div>
+
+
+
+    </form>
+    <button type="button" class="btn btn-primary mt-4" (click)="goToLogin()">Go to Login</button>
+  </div>
+
+
+</div>
