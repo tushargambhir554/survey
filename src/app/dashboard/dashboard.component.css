@@ -1,4 +1,19 @@
-.main-box{
+.main-box {
     max-width: 800px;
-    margin-top: 6%;
-}
+    margin: 3% auto;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  
+  .buttons {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+
+  .text-right{
+    text-align: right;
+  }

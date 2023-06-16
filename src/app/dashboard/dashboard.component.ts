@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { UserService } from 'src/assets/UserService';
-import { FormControl, FormGroup, Validators,FormBuilder } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@angular/forms';
+
 
 
 @Component({
@@ -10,26 +11,42 @@ import { FormControl, FormGroup, Validators,FormBuilder } from '@angular/forms';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  size = 6;
+  size = 10;
   questions: any[] = [];
   questionText: string | undefined;
   code: string | undefined;
   weight: string | undefined;
-  reactiveForm!: FormGroup;;
+  reactiveForm!: FormGroup;
 
-
-  constructor(private http: HttpClient, private userService: UserService) { }
+  constructor(private http: HttpClient, private userService: UserService, private formBuilder: FormBuilder) { }
 
   ngOnInit() {
-    this.reactiveForm = new FormGroup({
-      
-        ques: new FormControl(null, Validators.required),
-        code: new FormControl(null, Validators.required),
-        marks: new FormControl(null, Validators.required)
-        
+    this.reactiveForm = this.formBuilder.group({
+      questionItems: this.formBuilder.array([]) // Initialize an empty FormArray
     });
 
+    this.addQuestion(); // Add the first question item by default
     this.fetchQuestions('fetch');
+  }
+
+  get questionItems() {
+    return this.reactiveForm.get('questionItems') as FormArray;
+  }
+
+  addQuestion() {
+    const questionItem = this.formBuilder.group({
+      ques: [null, Validators.required],
+      code: [null, Validators.required],
+      marks: [null, [Validators.required, Validators.min(0)]]
+    });
+  
+    this.questionItems.push(questionItem);
+  }
+  
+  
+
+  removeQuestion(index: number) {
+    this.questionItems.removeAt(index);
   }
 
   fetchQuestions(id: any) {
@@ -59,23 +76,12 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-
-
-
-  addQuestion() {
-
-    // this.reactiveForm.reset();
-    console.log(this.reactiveForm)  
-    this.fetchQuestions('fetch');
-  }
-
   editQuestion(question: any) {
     question.editMode = true;
   }
 
 
-
-
+  // -------Edit/Patch api------
   saveQuestion(question: any) {
     const headers = this.userService.getRequestHeaders();
   
@@ -171,63 +177,81 @@ export class DashboardComponent implements OnInit {
         }
       );
   }
+  getQuestionControlName(index: number, controlName: string): string {
+    return `questionItems.${index}.${controlName}`;
+  }
   
 
+
+  // -------Post api------
+  
   submitQuestion() {
     const headers = this.userService.getRequestHeaders();
-
-    const formData = {
-      "id": 0,
-      "tenant": 0,
-      "domain": "DOMAIN.HEALTH",
-      "questionCode": "FB_001",
-      "questionClass": {
-        "code": "QUESTION_CLASS.QUESTION"
-      },
-      "questionType": {
-        "code": "QUESTION_TYPE.SUBJECTIVE_LONG"
-      },
-      "questionText": [
-        {
-          "text": this.reactiveForm.value.ques,
-          "language": {
-            "code": this.reactiveForm.value.code,
-            "label": "English"
+  
+    for (let i = 0; i < this.questionItems.length; i++) {
+      const questionFormGroup = this.questionItems.at(i) as FormGroup;
+  
+      const quesControl = questionFormGroup.get('ques');
+      const codeControl = questionFormGroup.get('code');
+      const marksControl = questionFormGroup.get('marks');
+  
+      if (quesControl && codeControl && marksControl) {
+        const formData = {
+          id: 0,
+          tenant: 0,
+          domain: 'DOMAIN.HEALTH',
+          questionCode: 'FB_001',
+          questionClass: {
+            code: 'QUESTION_CLASS.QUESTION'
+          },
+          questionType: {
+            code: 'QUESTION_TYPE.SUBJECTIVE_LONG'
+          },
+          questionText: [
+            {
+              text: quesControl.value,
+              language: {
+                code: codeControl.value,
+                label: 'English'
+              }
+            }
+          ],
+          questionSubText: [
+            {
+              text: '',
+              language: {
+                code: 'ENG',
+                label: 'English'
+              }
+            }
+          ],
+          questionName: [],
+          weight: marksControl.value,
+          tenantId: 0,
+          questionImageURL: '',
+          defaultOptionsList: [],
+          questionSubtype: {
+            code: 'QUESTION_SUB_TYPE.SUBJECTIVE'
           }
-        }
-      ],
-      "questionSubText": [
-        {
-          "text": "",
-          "language": {
-            "code": "ENG",
-            "label": "English"
+        };
+  
+        this.http.post('https://dev.platformcommons.org/gateway/assessment-service/api/v1/questions', formData,  headers)
+        .subscribe(
+          (response) => {
+            console.log(response);
+            // this.fetchQuestions('post');
+          },
+          (error) => {
+            console.error(error);
           }
-        }
-      ],
-      "questionName": [],
-      "weight": this.reactiveForm.value.marks,
-      "tenantId": 0,
-      "questionImageURL": "",
-      "defaultOptionsList": [],
-      "questionSubtype": {
-        "code": "QUESTION_SUB_TYPE.SUBJECTIVE"
-
-      },
-
-    };
-
-    this.http.post('https://dev.platformcommons.org/gateway/assessment-service/api/v1/questions', formData, headers
-    ).subscribe(
-      (response) => {
-        console.log(response);
-        this.fetchQuestions('post');
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
+        );
+    }
   }
+}
+
+
+
+// -------Delete api------
 
   deleteQuestion(questionId: number) {
     const headers = this.userService.getRequestHeaders();
